@@ -1,57 +1,27 @@
 package models
 
 import (
-	"database/sql"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // Product represents a product in the system
 type Product struct {
-	ID          int64     `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Price       float64   `json:"price"`
-	SKU         string    `json:"sku"`
-	Stock       int       `json:"stock"`
-	CategoryID  int64     `json:"category_id"`
-	IsActive    bool      `json:"is_active"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID          int64          `json:"id" gorm:"primaryKey"`
+	Name        string         `json:"name" gorm:"size:255;not null"`
+	Description string         `json:"description" gorm:"type:text"`
+	Price       float64        `json:"price" gorm:"type:decimal(10,2);not null"`
+	SKU         string         `json:"sku" gorm:"uniqueIndex;size:100;not null"`
+	Stock       int            `json:"stock" gorm:"not null;default:0"`
+	CategoryID  int64          `json:"category_id" gorm:"index"`
+	IsActive    bool           `json:"is_active" gorm:"default:true"`
+	CreatedAt   time.Time      `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt   time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"` // Soft delete support
 }
 
 // TableName returns the database table name for the Product model
 func (Product) TableName() string {
 	return "products"
-}
-
-// ScanFromRow scans a database row into a Product model
-func (p *Product) ScanFromRow(row *sql.Row) error {
-	return row.Scan(
-		&p.ID,
-		&p.Name,
-		&p.Description,
-		&p.Price,
-		&p.SKU,
-		&p.Stock,
-		&p.CategoryID,
-		&p.IsActive,
-		&p.CreatedAt,
-		&p.UpdatedAt,
-	)
-}
-
-// ScanFromRows scans a database row from a rows result set into a Product model
-func (p *Product) ScanFromRows(rows *sql.Rows) error {
-	return rows.Scan(
-		&p.ID,
-		&p.Name,
-		&p.Description,
-		&p.Price,
-		&p.SKU,
-		&p.Stock,
-		&p.CategoryID,
-		&p.IsActive,
-		&p.CreatedAt,
-		&p.UpdatedAt,
-	)
 }
