@@ -1,211 +1,185 @@
-# GoWK Web Framework
+# GoApp - DDD架构示例项目
 
-GoWK是一个基于Go语言的企业级Web应用框架，提供了完整的项目结构和丰富的功能组件。
+> 采用领域驱动设计（DDD）的Go Web应用
 
-## 特性
-
-- 🚀 基于Gin的高性能Web框架
-- 🔐 内置认证和权限控制
-- 📊 系统监控和指标收集
-- 🎯 事件驱动架构
-- 💾 数据库和Redis支持
-- ⚡️ 任务系统
-- 🔍 结构化日志
-- ✨ 优雅的错误处理
-
-## 项目结构
+## 🏗️ 项目结构
 
 ```
-.
-├── main.go                 # 应用入口
-├── go.mod                 # Go模块定义
-├── go.sum                 # 依赖版本锁定
-├── internal/              # 内部包
-│   ├── app/              # 核心应用组件
-│   │   ├── errors/       # 错误处理系统
-│   │   ├── config.go     # 配置管理
-│   │   ├── database.go   # 数据库初始化
-│   │   ├── redis.go      # Redis初始化
-│   │   ├── logger.go     # 日志管理
-│   │   ├── services.go   # 服务注册
-│   │   └── validator.go  # 请求验证
-│   ├── context/          # 请求上下文
-│   │   ├── api_context.go    # API上下文封装
-│   │   └── request_id.go     # 请求ID管理
-│   ├── controllers/      # API控制器
-│   │   ├── monitor_controller.go  # 监控接口
-│   │   ├── product_controller.go  # 产品接口
-│   │   └── user_controller.go     # 用户接口
-│   ├── dto/             # 数据传输对象
-│   │   ├── product_dto.go    # 产品相关DTO
-│   │   ├── response_dto.go   # 通用响应DTO
-│   │   └── user_dto.go       # 用户相关DTO
-│   ├── events/          # 事件系统
-│   │   ├── event_bus.go      # 事件总线
-│   │   └── events.go         # 事件定义
-│   ├── middleware/      # HTTP中间件
-│   │   ├── auth.go           # 认证中间件
-│   │   ├── events_middleware.go  # 事件中间件
-│   │   ├── logger.go         # 日志中间件
-│   │   └── response_formatter.go # 响应格式化
-│   ├── models/          # 数据模型
-│   │   ├── product.go        # 产品模型
-│   │   └── user.go           # 用户模型
-│   ├── repositories/    # 数据访问层
-│   │   ├── product_repository.go
-│   │   └── user_repository.go
-│   ├── router/         # 路由管理
-│   │   └── router.go         # 路由注册
-│   ├── services/       # 业务逻辑层
-│   │   ├── monitor_service.go
-│   │   ├── product_service.go
+goapp/
+├── main.go                      # 应用入口
+├── go.mod                       # Go模块定义
+│
+├── docs/                        # 📚 文档
+│   └── DDD_GUIDE.md            # DDD架构完整指南
+│
+├── internal/                    # 内部代码
+│   │
+│   ├── domain/                 # 🎯 领域层（核心业务逻辑）
+│   │   └── user/
+│   │       ├── user.go         # User实体（富血模型）
+│   │       ├── email.go        # Email值对象
+│   │       ├── password.go     # Password值对象
+│   │       ├── repository.go   # 仓储接口
+│   │       └── events.go       # 领域事件
+│   │
+│   ├── application/            # 📋 应用层（业务流程编排）
 │   │   └── user_service.go
-│   └── tasks/          # 后台任务
-│       └── tasks.go          # 任务定义
-├── logs/               # 日志文件
-└── utils/             # 通用工具
-    ├── array.go
-    ├── convert.go
-    ├── file.go
-    ├── http.go
-    ├── paginator.go
-    ├── security.go
-    ├── stringutil.go
-    └── timeutil.go
+│   │
+│   ├── infrastructure/         # 🔧 基础设施层（技术实现）
+│   │   └── persistence/
+│   │       ├── user_po.go
+│   │       ├── user_mapper.go
+│   │       └── user_repository_impl.go
+│   │
+│   ├── interfaces/             # 🌐 接口层（对外API）
+│   │   └── http/
+│   │       └── user_controller.go
+│   │
+│   ├── app/                    # ⚙️ 应用配置
+│   │   ├── config.go
+│   │   ├── database.go
+│   │   ├── logger.go
+│   │   └── errors/
+│   │
+│   ├── middleware/             # 🔀 中间件
+│   ├── router/                 # 🛣️ 路由
+│   ├── events/                 # 📡 事件系统
+│   ├── dto/                    # 📦 数据传输对象
+│   ├── context/                # 🔗 上下文
+│   ├── tasks/                  # ⏰ 任务
+│   │
+│   └── _legacy/                # 🗂️ 旧代码（待清理）
+│       ├── models/
+│       ├── services/
+│       ├── repositories/
+│       └── controllers/
+│
+└── utils/                      # 🛠️ 工具函数
 ```
 
-## 架构设计
+## 🎯 DDD四层架构
 
-```mermaid
-graph TD
-    A[HTTP请求] --> B[Router]
-    B --> C[Middleware]
-    C --> D[Controller]
-    D --> E[Service]
-    E --> F[Repository]
-    F --> G[Database/Redis]
-    
-    H[Events] --> I[EventBus]
-    I --> J[EventHandlers]
-    
-    K[Tasks] --> L[TaskRunner]
-    
-    M[Monitor] --> N[Metrics]
-    
-    subgraph Core Components
-        O[Logger]
-        P[Config]
-        Q[Validator]
-        R[ErrorHandler]
-    end
+```
+┌─────────────────────────────────────┐
+│   接口层 (Interfaces)                │
+│   处理HTTP请求、数据格式转换           │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│   应用层 (Application)               │
+│   编排业务流程、调用领域对象           │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│   领域层 (Domain) ⭐                 │
+│   核心业务逻辑、业务规则              │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│   基础设施层 (Infrastructure)         │
+│   数据库访问、外部服务调用             │
+└───────────────────────────────────────┘
 ```
 
-## 快速开始
+## ✨ 核心特性
 
-1. 克隆项目模板：
+### 富血模型（Rich Domain Model）
+实体包含数据和业务行为，不是简单的数据容器：
 
+```go
+type User struct {
+    id       int64
+    email    Email      // 值对象
+    password Password   // 值对象
+}
+
+// 业务行为
+func (u *User) Activate()
+func (u *User) Authenticate(password string) bool
+func (u *User) ChangePassword(newPassword string) error
+```
+
+### 值对象（Value Objects）
+封装验证逻辑，类型安全：
+
+```go
+type Email struct {
+    value string
+}
+
+func NewEmail(email string) (Email, error) {
+    // 创建时自动验证
+    if !isValidEmail(email) {
+        return Email{}, errors.New("invalid email")
+    }
+    return Email{value: email}, nil
+}
+```
+
+### 依赖倒置（Dependency Inversion）
+领域层定义接口，基础设施层实现：
+
+```go
+// 领域层定义
+type Repository interface {
+    Save(user *User) (*User, error)
+    FindByID(id int64) (*User, error)
+}
+
+// 基础设施层实现
+type UserRepositoryImpl struct {
+    db *gorm.DB
+}
+```
+
+## 🚀 快速开始
+
+### 安装依赖
 ```bash
-git clone https://github.com/yourusername/gowk-template.git myproject
-cd myproject
+go mod download
 ```
 
-2. 修改go.mod：
-
-```bash
-go mod edit -module github.com/yourusername/myproject
-```
-
-3. 安装依赖：
-
-```bash
-go mod tidy
-```
-
-4. 运行项目：
-
+### 运行项目
 ```bash
 go run main.go
 ```
 
-## 主要组件说明
-
-### 错误处理
-
-使用类型安全的错误码系统：
-
-```go
-// 返回错误响应
-apiCtx.ErrorWithCode(errors.BadRequest, "Invalid parameters")
-
-// 使用预定义错误
-apiCtx.ErrorWithCode(errors.NotFound, "User not found")
+### 运行测试
+```bash
+go test ./...
 ```
 
-### 事件系统
+## 📖 文档
 
-发布和订阅事件：
+- [DDD架构完整指南](docs/DDD_GUIDE.md) - 详细的DDD架构说明
 
-```go
-// 发布事件
-events.Publish(events.UserCreated, map[string]interface{}{
-    "user_id": user.ID,
-})
+## 🔄 迁移状态
 
-// 订阅事件
-events.Subscribe(events.UserCreated, func(data map[string]interface{}) {
-    // 处理事件
-})
-```
+### ✅ 已完成
+- User领域 - 完全采用DDD架构
 
-### 中间件
+### ⏳ 进行中
+- Product领域 - 计划迁移
+- Order领域 - 待规划
 
-添加自定义中间件：
+## 🎓 学习资源
 
-```go
-// 路由组添加中间件
-api := router.Group("/api")
-api.Use(
-    middleware.Auth(),
-    middleware.Logger(),
-)
-```
+### 核心概念
+- **实体（Entity）** - 有唯一标识的业务对象
+- **值对象（Value Object）** - 没有唯一标识的不可变对象
+- **聚合（Aggregate）** - 一组相关对象的集合
+- **仓储（Repository）** - 持久化接口
+- **领域服务（Domain Service）** - 跨实体的业务逻辑
+- **应用服务（Application Service）** - 业务流程编排
 
-### 监控
+### 推荐阅读
+- 《领域驱动设计》- Eric Evans
+- 《实现领域驱动设计》- Vaughn Vernon
 
-获取系统指标：
+## 🤝 贡献
 
-```go
-stats := monitorService.GetStats()
-fmt.Printf("Total Requests: %v\n", stats["total_requests"])
-fmt.Printf("Error Rate: %.2f%%\n", stats["error_rate"])
-```
+欢迎提交Issue和Pull Request！
 
-## 配置说明
-
-项目配置位于`config.yaml`：
-
-```yaml
-server:
-  port: 8080
-  mode: development
-
-database:
-  host: localhost
-  port: 5432
-  name: myapp
-  user: postgres
-  password: secret
-
-redis:
-  host: localhost
-  port: 6379
-  db: 0
-
-log:
-  level: info
-  file: logs/app.log
-```
-
-## 许可证
+## 📄 License
 
 MIT License

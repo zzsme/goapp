@@ -7,11 +7,12 @@ import (
 // Common event types
 const (
 	// User events
-	UserCreated   EventType = "user.created"
-	UserUpdated   EventType = "user.updated"
-	UserDeleted   EventType = "user.deleted"
-	UserLoggedIn  EventType = "user.logged_in"
-	UserLoggedOut EventType = "user.logged_out"
+	UserCreated      EventType = "user.created"
+	UserUpdated      EventType = "user.updated"
+	UserDeleted      EventType = "user.deleted"
+	UserLoggedIn     EventType = "user.logged_in"
+	UserLoggedOut    EventType = "user.logged_out"
+	PasswordChanged  EventType = "user.password_changed"
 
 	// Product events
 	ProductCreated EventType = "product.created"

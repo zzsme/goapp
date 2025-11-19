@@ -12,14 +12,12 @@ import (
 // UserService 用户应用服务 - 编排业务流程
 type UserService struct {
 	userRepo user.Repository
-	eventBus *events.EventBus
 }
 
 // NewUserService 创建用户应用服务
-func NewUserService(userRepo user.Repository, eventBus *events.EventBus) *UserService {
+func NewUserService(userRepo user.Repository) *UserService {
 	return &UserService{
 		userRepo: userRepo,
-		eventBus: eventBus,
 	}
 }
 
@@ -57,7 +55,7 @@ func (s *UserService) CreateUser(username, email, password, firstName, lastName 
 	}
 
 	// 5. 发布领域事件
-	s.eventBus.Publish(events.UserCreated, user.UserCreated{
+	events.Publish(events.UserCreated, user.UserCreated{
 		UserID:    savedUser.ID(),
 		Username:  savedUser.Username(),
 		Email:     savedUser.EmailValue(),
@@ -138,7 +136,7 @@ func (s *UserService) UpdateUser(id int64, username, email, firstName, lastName 
 	}
 
 	// 7. 发布事件
-	s.eventBus.Publish(events.UserUpdated, user.UserUpdated{
+	events.Publish(events.UserUpdated, user.UserUpdated{
 		UserID:    updatedUser.ID(),
 		Username:  updatedUser.Username(),
 		UpdatedAt: updatedUser.UpdatedAt(),
@@ -183,7 +181,7 @@ func (s *UserService) DeleteUser(id int64) error {
 	}
 
 	// 发布事件
-	s.eventBus.Publish(events.UserDeleted, user.UserDeleted{
+	events.Publish(events.UserDeleted, user.UserDeleted{
 		UserID:    id,
 		DeletedAt: userEntity.UpdatedAt(),
 	})
@@ -249,7 +247,7 @@ func (s *UserService) ChangePassword(id int64, oldPassword, newPassword string) 
 	}
 
 	// 发布事件
-	s.eventBus.Publish(events.PasswordChanged, user.PasswordChanged{
+	events.Publish(events.PasswordChanged, user.PasswordChanged{
 		UserID:    updatedUser.ID(),
 		UpdatedAt: updatedUser.UpdatedAt(),
 	})

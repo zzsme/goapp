@@ -2,7 +2,7 @@ package models
 
 import (
 	"time"
-
+	
 	"gorm.io/gorm"
 )
 
@@ -18,7 +18,7 @@ type Product struct {
 	IsActive    bool           `json:"is_active" gorm:"default:true"`
 	CreatedAt   time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt   time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"` // Soft delete support
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 // TableName returns the database table name for the Product model
